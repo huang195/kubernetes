@@ -21,6 +21,7 @@ import (
 	"math/rand"
 	"net/http"
 	"path"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -334,6 +335,20 @@ func GetKubeletDockerContainers(client DockerInterface, allContainers bool) (Doc
 		if len(container.Names) == 0 {
 			continue
 		}
+
+		r, e := regexp.Compile(`/(.+)/(.+)`)
+		if e != nil {
+			glog.V(3).Info("Cannot regexp.Compile()")
+			continue
+		}
+
+		res := r.FindAllStringSubmatch(container.Names[0], -1)
+		if res != nil {
+			if len(res[0]) == 3 {
+				container.Names[0] = "/" + res[0][2]
+			}
+		}
+
 		// Skip containers that we didn't create to allow users to manually
 		// spin up their own containers if they want.
 		// TODO(dchen1107): Remove the old separator "--" by end of Oct
