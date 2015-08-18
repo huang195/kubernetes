@@ -25,6 +25,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -401,6 +402,20 @@ func (dm *DockerManager) GetPodStatus(pod *api.Pod) (*api.PodStatus, error) {
 		if len(value.Names) == 0 {
 			continue
 		}
+
+		r, e := regexp.Compile(`/(.+)/(.+)`)
+		if e != nil {
+			glog.V(3).Info("Cannot regexp.Compile()")
+			continue
+		}
+
+		res := r.FindAllStringSubmatch(value.Names[0], -1)
+		if res != nil {
+			if len(res[0]) == 3 {
+				value.Names[0] = "/" + res[0][2]
+			}
+		}
+
 		dockerName, _, err := ParseDockerName(value.Names[0])
 		if err != nil {
 			continue
