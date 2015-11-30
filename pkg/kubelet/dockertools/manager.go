@@ -451,7 +451,12 @@ func (dm *DockerManager) GetPodStatus(pod *api.Pod) (*api.PodStatus, error) {
 	}
 	expectedContainers[PodInfraContainerName] = api.Container{}
 
-	containers, err := dm.client.ListContainers(docker.ListContainersOptions{All: true})
+	namespacedName := types.NamespacedName{Namespace: pod.Namespace, Name: pod.Name}
+	filter := fmt.Sprint(kubernetesNameLabel, "=", namespacedName.String())
+	labels := map[string][]string{
+		"label": {filter},
+	}
+	containers, err := dm.client.ListContainers(docker.ListContainersOptions{All: false, Filters: labels})
 	if err != nil {
 		return nil, err
 	}

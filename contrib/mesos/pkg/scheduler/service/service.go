@@ -381,7 +381,7 @@ func (s *SchedulerServer) prepareExecutorInfo(hks hyperkube.Interface) (*mesos.E
 	ci.Arguments = append(ci.Arguments, fmt.Sprintf("--mesos-cgroup-prefix=%v", s.MesosCgroupPrefix))
 	ci.Arguments = append(ci.Arguments, fmt.Sprintf("--cadvisor-port=%v", s.KubeletCadvisorPort))
 	//ci.Arguments = append(ci.Arguments, fmt.Sprintf("--sync-frequency=%v", s.KubeletSyncFrequency))
-	ci.Arguments = append(ci.Arguments, fmt.Sprintf("--sync-frequency=%v", "60s"))
+	ci.Arguments = append(ci.Arguments, fmt.Sprintf("--sync-frequency=%v", "180s"))
 	ci.Arguments = append(ci.Arguments, fmt.Sprintf("--max-pods=%v", "500"))
 	ci.Arguments = append(ci.Arguments, fmt.Sprintf("--contain-pod-resources=%t", s.ContainPodResources))
 

@@ -23,7 +23,7 @@ import (
 
 var (
 	// TODO(yifan): Maybe set the them as parameters for NewCache().
-	defaultCachePeriod    = time.Second * 2
+	defaultCachePeriod    = time.Second * 180
 	defaultUpdateInterval = time.Millisecond * 100
 )
 
@@ -82,10 +82,10 @@ func (r *runtimeCache) GetPods() ([]*Pod, error) {
 	}
 	// Stop refreshing thread if there were no requests within the default cache period
 	r.updatingThreadStopTime = time.Now().Add(defaultCachePeriod)
-	if !r.updating {
-		r.updating = true
-		go r.startUpdatingCache()
-	}
+	//if !r.updating {
+	//r.updating = true
+	//go r.startUpdatingCache()
+	//}
 	return r.pods, nil
 }
 
