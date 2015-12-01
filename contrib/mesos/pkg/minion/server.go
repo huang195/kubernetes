@@ -167,6 +167,8 @@ func (ms *MinionServer) launchExecutorServer() <-chan struct{} {
 	if ms.cgroupRoot != "" {
 		executorArgs = append(executorArgs, "--cgroup-root="+ms.cgroupRoot)
 	}
+	executorArgs = append(executorArgs, "--housekeeping_interval=10000h0m0s")
+	executorArgs = append(executorArgs, "--global_housekeeping_interval=10000h0m0s")
 
 	// run executor and quit minion server when this exits cleanly
 	execDied := make(chan struct{})

@@ -111,7 +111,7 @@ const (
 	ResolvConfDefault = "/etc/resolv.conf"
 
 	// Period for performing global cleanup tasks.
-	housekeepingPeriod = time.Second * 2
+	housekeepingPeriod = time.Second * 180
 
 	etcHostsPath = "/etc/hosts"
 
@@ -831,13 +831,13 @@ func (kl *Kubelet) StartGarbageCollection() {
 		if err := kl.containerGC.GarbageCollect(); err != nil {
 			glog.Errorf("Container garbage collection failed: %v", err)
 		}
-	}, time.Minute, util.NeverStop)
+	}, 15*time.Minute, util.NeverStop)
 
 	go util.Until(func() {
 		if err := kl.imageManager.GarbageCollect(); err != nil {
 			glog.Errorf("Image garbage collection failed: %v", err)
 		}
-	}, 5*time.Minute, util.NeverStop)
+	}, 30*time.Minute, util.NeverStop)
 }
 
 // initializeModules will initialize internal modules that do not require the container runtime to be up.
