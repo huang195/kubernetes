@@ -109,3 +109,15 @@ var EmailAddressUserConversion = UserConversionFunc(func(chain []*x509.Certifica
 	}
 	return &user.DefaultInfo{Name: chain[0].EmailAddresses[0]}, true, nil
 })
+
+// BMCommonNameUserConversion builds user info from a certificate chain (used by Bluemix) using the subject's CommonName
+var BMCommonNameUserConversion = UserConversionFunc(func(chain []*x509.Certificate) (user.Info, bool, error) {
+	if len(chain[0].Subject.CommonName) == 0 {
+		return nil, false, nil
+	}
+	if chain[0].Subject.CommonName == "client" && len(chain[0].Subject.Names) == 2 {
+		return &user.DefaultInfo{Name: chain[0].Subject.Names[1].Value.(string)}, true, nil
+	} else {
+		return &user.DefaultInfo{Name: chain[0].Subject.CommonName}, true, nil
+	}
+})
