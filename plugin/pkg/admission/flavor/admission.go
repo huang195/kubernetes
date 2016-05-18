@@ -145,7 +145,7 @@ func matchFlavor(flavor api.ResourceList, req api.ResourceList) bool {
 			return false
 		}
 		if fv != v {
-			glog.infof("%v != %v\n", fv, v)
+			glog.Infof("%v != %v\n", fv, v)
 			return false
 		}
 		delete(resources, k)
