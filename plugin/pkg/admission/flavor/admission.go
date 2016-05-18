@@ -138,15 +138,16 @@ func matchFlavor(flavor api.ResourceList, req api.ResourceList) bool {
 	}
 
 	for k, v := range req {
+		glog.Infof("k = %v, v = %v\n", k, v)
 		fv, exists := flavor[k]
 		if !exists {
+			glog.Infof("%v does not exist\n", k)
 			return false
 		}
-
 		if fv != v {
+			glog.infof("%v != %v\n", fv, v)
 			return false
 		}
-
 		delete(resources, k)
 	}
 
