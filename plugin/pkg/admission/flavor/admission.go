@@ -17,20 +17,56 @@ import (
 
 // This plugin perform the following tasks
 // 1. Ensures all containers are of defined flavors, and reject if they're not
-// 2. If user defines a partial flavor, e.g., cpu=125m, we will fill out the rest of the flavor
+// 2. If user defines a partial flavor, e.g., memory=64M, we will fill out the rest of the flavor
 
-// This plugin currently does not support using flavors by name, e.g., --requests="small" --limits="medium"
 // This plugin should run after the Limitrange plugin so default values can be filled in before we check flavor,
 // (make sure the default values are valid flavors)
-// The ordering between limitrange and flavor plugins can be tricky if we want to use flavors by name. If flavor
-// goes first, then it won't be able to check if default values are valid flavors (this is less of a problem if
-// default value is configured to be the smallest flavor). If limitrange goes first, it won't be able to parse
-// flavors by name and perform checks, e.g., (min <= req <= limits <= max), but this should also be fine since
-// there's a validation step after all admission control plugins are finished.
 
-// We are assuming the file specified by --admission-control-config-file=<file> is in key-value pairs
+// We are assuming the file specified by --admission-control-config-file=<file> is in key-value pairs.
 // In this file, we're going to scan for the key specified by FlavorConfigFile, and its value specifies
 // the location of file that described the list of supported flavors.
+
+// This is an example configuration file with a list of supported flavors
+//{
+//	"flavors": {
+//		"pico": {
+//			"memory": "64Mi",
+//			"cpu": "100m"
+//		},
+//		"nano": {
+//			"memory": "128Mi",
+//			"cpu": "125m"
+//		},
+//		"micro": {
+//			"memory": "256Mi",
+//			"cpu": "150m"
+//		},
+//		"tiny": {
+//			"memory": "512Mi",
+//			"cpu": "200m"
+//		},
+//		"small": {
+//			"memory": "1024Mi",
+//			"cpu": "250m"
+//		},
+//		"medium": {
+//			"memory": "2048Mi",
+//			"cpu": "500m"
+//		},
+//		"large": {
+//			"memory": "4096Mi",
+//			"cpu": "1"
+//		},
+//		"xlarge": {
+//			"memory": "8192Mi",
+//			"cpu": "2"
+//		},
+//		"2xlarge": {
+//			"memory": "16384Mi",
+//			"cpu": "4"
+//		}
+//	}
+//}
 
 const (
 	FlavorConfigFile = "flavor.config"
@@ -83,8 +119,9 @@ func (f *flavor) Admit(a admission.Attributes) error {
 		}
 
 		for _, v := range f.flavors.Flavors {
-			found = matchFlavor(v, reqs)
-			break
+			if found = matchFlavor(v, reqs); found {
+				break
+			}
 		}
 	}
 
