@@ -144,7 +144,7 @@ func matchFlavor(flavor api.ResourceList, req api.ResourceList) bool {
 			glog.Infof("%v does not exist\n", k)
 			return false
 		}
-		if fv != v {
+		if fv.Cmp(v) != 0 {
 			glog.Infof("%v != %v\n", fv, v)
 			return false
 		}
