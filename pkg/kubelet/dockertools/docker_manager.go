@@ -617,6 +617,9 @@ func (dm *DockerManager) runContainer(
 		}
 	}
 	memoryLimit := container.Resources.Limits.Memory().Value()
+	if memoryLimit < 4*1024*1024 {
+		memoryLimit = 4 * 1024 * 1024
+	}
 	cpuRequest := container.Resources.Requests.Cpu()
 	cpuLimit := container.Resources.Limits.Cpu()
 	nvidiaGPULimit := container.Resources.Limits.NvidiaGPU()

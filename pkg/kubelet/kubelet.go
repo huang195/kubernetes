@@ -1368,6 +1368,38 @@ func (kl *Kubelet) syncPod(o syncPodOptions) error {
 	result := kl.containerRuntime.SyncPod(pod, apiPodStatus, podStatus, pullSecrets, kl.backOff)
 	kl.reasonCache.Update(pod.UID, result)
 	if err = result.Error(); err != nil {
+		if strings.Contains(err.Error(), "Not enough Memory") {
+			go func() {
+				// mirror key doesn't seem to be exported
+				_, isMirrorPod := pod.ObjectMeta.Annotations["kubernetes.io/config.mirror"]
+				if isMirrorPod {
+					return
+				}
+				_, hasController := pod.ObjectMeta.Annotations[api.CreatedByAnnotation]
+				_ = kl.kubeClient.Core().Pods(pod.Namespace).Delete(pod.Name, &api.DeleteOptions{})
+				if !hasController {
+					pod.Status = api.PodStatus{}
+					pod.Spec.NodeName = ""
+					pod.Spec.Hostname = ""
+					pod.UID = ""
+					pod.ResourceVersion = ""
+					pod.CreationTimestamp = unversioned.Time{}
+					for {
+						time.Sleep(1 * time.Second)
+						_, e := kl.kubeClient.Core().Pods(pod.Namespace).Get(pod.Name)
+						if e == nil {
+							glog.Infof("pod %v/%v is still not deleted, waiting", pod.Namespace, pod.Name)
+							continue
+						}
+						_, e = kl.kubeClient.Core().Pods(pod.Namespace).Create(pod)
+						if e != nil {
+							glog.Errorf("Cannot recreate a new pod: %v\n", e)
+						}
+						return
+					}
+				}
+			}()
+		}
 		return err
 	}
 
